@@ -1,14 +1,16 @@
 import numpy as np
+from easydict import EasyDict
+from datasets import Dataset
 from transformers import Wav2Vec2CTCTokenizer, Wav2Vec2FeatureExtractor, Wav2Vec2Processor, Wav2Vec2ForCTC
 from transformers import TrainingArguments, Trainer
 
 from pyw2v2.components.metrics import Metrics
-from pyw2v2.external.data_collator_ctc import DataCollatorCTCWithPadding
+from pyw2v2.components.external.data_collator_ctc import DataCollatorCTCWithPadding
 
 
 class ModelCTC:
 
-    def __init__(self, config):
+    def __init__(self, config: EasyDict):
         self._model = None
         self._metrics = None
         self._processor = None
@@ -26,10 +28,10 @@ class ModelCTC:
         return self._processor
     
     @processor.setter
-    def processor(self, var):
+    def processor(self, var: Wav2Vec2Processor):
         self._processor = var
 
-    def _init_processor(self, config):
+    def _init_processor(self, config: EasyDict):
         config.processor.tokenizer.vocab_file = config.common.vocab_file
         tokenizer = Wav2Vec2CTCTokenizer(**config.processor.tokenizer)
         feature_extractor = Wav2Vec2FeatureExtractor(**config.processor.feature_extractor)
@@ -38,13 +40,13 @@ class ModelCTC:
         processor.save_pretrained(config.common.model_path)
         self._processor = processor
 
-    def _init_metrics(self, config):
+    def _init_metrics(self, config: EasyDict):
         self._metrics = Metrics(*config.common.metrics)
 
     def _init_data_collator(self):
         self._data_collator = DataCollatorCTCWithPadding(processor=self._processor, padding=True)
 
-    def _init_model(self, config):
+    def _init_model(self, config: EasyDict):
         if not config.common.checkpoint_model:
             print(f"Loading pretrained model {config.common.pretrained_model}")
             config.model.pretrained_model_name_or_path = config.common.pretrained_model
@@ -55,7 +57,7 @@ class ModelCTC:
             print(f"Loading from checkpoint {config.common.checkpoint_model}")
             self._model = Wav2Vec2ForCTC.from_pretrained(config.common.checkpoint_model).to("cuda")
     
-    def _init_training_args(self, config):
+    def _init_training_args(self, config: EasyDict):
         config.training_args.output_dir = config.common.model_path
         self._training_args = TrainingArguments(**config.training_args)
         
@@ -70,7 +72,7 @@ class ModelCTC:
         res = self._metrics.compute(predictions=pred_str, references=label_str)
         return res
     
-    def train(self, train_set, eval_set):
+    def train(self, train_set: Dataset, eval_set: Dataset):
         trainer = Trainer(
             model=self._model,
             data_collator=self._data_collator,

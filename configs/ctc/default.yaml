@@ -1,0 +1,39 @@
+common:
+  model_path: "./models/model2"
+  vocab_file: "./vocab.json"
+  pretrained_model: "facebook/wav2vec2-large-xlsr-53"
+  checkpoint_model: "./models/checkpoint-4000"
+  metrics: ["wer", "cer"]
+processor:
+  tokenizer:
+    unk_token: "[UNK]"
+    pad_token: "[PAD]"
+    word_delimiter_token: "|"
+  feature_extractor:
+    feature_size: 1
+    sampling_rate: 16000
+    padding_value: 0.0
+    do_normalize: True
+    return_attention_mask: True
+model:
+  attention_dropout: 0.1
+  hidden_dropout: 0.1
+  feat_proj_dropout: 0.0
+  mask_time_prob: 0.05
+  layerdrop: 0.1
+  gradient_checkpointing: True
+  ctc_loss_reduction: "mean"
+training_args:
+  group_by_length: True
+  per_device_train_batch_size: 1 # 16
+  gradient_accumulation_steps: 2
+  evaluation_strategy: "steps"
+  num_train_epochs: 30
+  fp16: True
+  save_steps: 400
+  eval_steps: 400
+  logging_steps: 400
+  learning_rate: 0.0003 # 3e-4
+  warmup_steps: 500
+  save_total_limit: 2
+  

@@ -1,0 +1,11 @@
+data_proc:
+  n_jobs: 1
+  n_samples_train: 80
+  n_samples_test: 20
+  sampling_rate: 16000
+  path_column: "path"
+  text_column: "text"
+  remove_chars: [",","?",".","!","-",";",":",'"',"“","%","‘","”","�","…","«","»","–","—"]
+  replace_chars:
+    "'": "`"
+    "’": "`"

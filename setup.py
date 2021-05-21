@@ -1,8 +1,10 @@
 from setuptools import setup, find_packages
 
-VERSION = '0.0.1a1'
+VERSION = '0.0.1a2'
 DESCRIPTION = 'Simple wav2vec2 wrapper'
-LONG_DESCRIPTION = 'A simple wrapper for wav2vec2 for accelerated ASR research.'
+
+with open("./README.md", 'r') as f:
+    long_description = "\n" + "".join(f.readlines())
 
 # Setting up
 setup(
@@ -13,9 +15,9 @@ setup(
     url="https://github.com/vbrydik/pyw2v2",
     description=DESCRIPTION,
     long_description_content_type="text/markdown",
-    long_description=LONG_DESCRIPTION,
+    long_description=long_description,
     packages=find_packages(),
-    install_requires=["torch", "torchaudio", "librosa", "transformers", "datasets"],
+    install_requires=["torch", "torchaudio", "librosa", "transformers", "datasets", "easydict", "PyYAML"],
     keywords=['python'],
     classifiers=[
         "Development Status :: 1 - Planning",

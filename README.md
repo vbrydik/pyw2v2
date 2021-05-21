@@ -14,14 +14,14 @@ pip install pyw2v2
 
 ## Examples
 
-Different examples can be found [here](https://github.com/vbrydik/pyw2v2/tree/master/pyw2v2/configs/).
+Different examples can be found [here](https://github.com/vbrydik/pyw2v2/tree/master/examples/).
 
 ### Fine-tuning CTC model example
 
 This example will show how to load a pretrained model,
 load dataset, process dataset, and fine-tune CTC model.
 
-Example configuration files can be found [here](https://github.com/vbrydik/pyw2v2/tree/master/pyw2v2/configs/).
+Example configuration files can be found [here](https://github.com/vbrydik/pyw2v2/tree/master/configs/).
 
 ```py
 from pyw2v2 import ModelCTC, DatasetPreprocessor

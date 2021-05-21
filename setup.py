@@ -1,13 +1,6 @@
 from setuptools import setup, find_packages
-# import codecs
-# import os
 
-# here = os.path.abspath(os.path.dirname(__file__))
-
-# with codecs.open(os.path.join(here, "README.md"), encoding="utf-8") as fh:
-#     long_description = "\n" + fh.read()
-
-VERSION = '0.0.1'
+VERSION = '0.0.1a1'
 DESCRIPTION = 'Simple wav2vec2 wrapper'
 LONG_DESCRIPTION = 'A simple wrapper for wav2vec2 for accelerated ASR research.'
 
@@ -17,6 +10,7 @@ setup(
     version=VERSION,
     author="vbrydik (Vitalii Brydinskyi)",
     author_email="<vbrydinskyi@gmail.com>",
+    url="https://github.com/vbrydik/pyw2v2",
     description=DESCRIPTION,
     long_description_content_type="text/markdown",
     long_description=LONG_DESCRIPTION,

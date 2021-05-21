@@ -1,0 +1,10 @@
+dist/
+build/
+pyw2v2.egg-info/
+build.sh
+upload.sh
+Pipfile
+__pycache__/
+*.pyc
+*.pyo
+.vscode/

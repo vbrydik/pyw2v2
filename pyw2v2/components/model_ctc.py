@@ -1,0 +1,82 @@
+import numpy as np
+from transformers import Wav2Vec2CTCTokenizer, Wav2Vec2FeatureExtractor, Wav2Vec2Processor, Wav2Vec2ForCTC
+from transformers import TrainingArguments, Trainer
+
+from pyw2v2.components.metrics import Metrics
+from pyw2v2.external.data_collator_ctc import DataCollatorCTCWithPadding
+
+
+class ModelCTC:
+
+    def __init__(self, config):
+        self._model = None
+        self._metrics = None
+        self._processor = None
+        self._data_collator = None
+        self._training_args = None
+
+        self._init_processor(config)
+        self._init_metrics(config)
+        self._init_data_collator()
+        self._init_model(config)
+        self._init_training_args(config)
+        
+    @property
+    def processor(self):
+        return self._processor
+    
+    @processor.setter
+    def processor(self, var):
+        self._processor = var
+
+    def _init_processor(self, config):
+        config.processor.tokenizer.vocab_file = config.common.vocab_file
+        tokenizer = Wav2Vec2CTCTokenizer(**config.processor.tokenizer)
+        feature_extractor = Wav2Vec2FeatureExtractor(**config.processor.feature_extractor)
+
+        processor = Wav2Vec2Processor(feature_extractor=feature_extractor, tokenizer=tokenizer)
+        processor.save_pretrained(config.common.model_path)
+        self._processor = processor
+
+    def _init_metrics(self, config):
+        self._metrics = Metrics(*config.common.metrics)
+
+    def _init_data_collator(self):
+        self._data_collator = DataCollatorCTCWithPadding(processor=self._processor, padding=True)
+
+    def _init_model(self, config):
+        if not config.common.checkpoint_model:
+            print(f"Loading pretrained model {config.common.pretrained_model}")
+            config.model.pretrained_model_name_or_path = config.common.pretrained_model
+            config.model.pad_token_id = self._processor.tokenizer.pad_token_id
+            config.model.vocab_size = len(self._processor.tokenizer)
+            self._model = Wav2Vec2ForCTC.from_pretrained(**config.model)
+        else:
+            print(f"Loading from checkpoint {config.common.checkpoint_model}")
+            self._model = Wav2Vec2ForCTC.from_pretrained(config.common.checkpoint_model).to("cuda")
+    
+    def _init_training_args(self, config):
+        config.training_args.output_dir = config.common.model_path
+        self._training_args = TrainingArguments(**config.training_args)
+        
+    def _compute_metrics(self, pred):
+        pred_logits = pred.predictions
+        pred_ids = np.argmax(pred_logits, axis=-1)
+
+        pred.label_ids[pred.label_ids == -100] = self._processor.tokenizer.pad_token_id
+        pred_str = self._processor.batch_decode(pred_ids)
+        label_str = self._processor.batch_decode(pred.label_ids, group_tokens=False)
+
+        res = self._metrics.compute(predictions=pred_str, references=label_str)
+        return res
+    
+    def train(self, train_set, eval_set):
+        trainer = Trainer(
+            model=self._model,
+            data_collator=self._data_collator,
+            args=self._training_args,
+            compute_metrics=self._compute_metrics,
+            train_dataset=train_set,
+            eval_dataset=eval_set,
+            tokenizer=self._processor.feature_extractor)
+        trainer.train()

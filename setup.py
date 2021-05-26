@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-VERSION = '0.0.1a3'
+VERSION = '0.0.1a4'
 DESCRIPTION = 'Simple wav2vec2 wrapper'
 
 with open("./README.md", 'r') as f:

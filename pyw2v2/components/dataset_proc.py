@@ -104,7 +104,9 @@ class DatasetPreprocessor:
             data = self._to_lower(data, text_column='text')
         data = self._speech_file_to_array(data, path_column='path')
         data = self._resample(data, sampling_rate=sampling_rate)
-        data = self._prepare_batch(data, make_labels=make_labels)
+        data = self._prepare_batch(data, batch_size=8, batched=True,
+                                   num_proc=self._num_proc,
+                                   make_labels=make_labels)
         return data
             
         

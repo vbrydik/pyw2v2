@@ -106,10 +106,10 @@ class ModelCTC:
 
     def decode_raw(self, path: str or list):
         if isinstance(path, str):
-            sample = self._dataset_preprocessor.process_one([path], audio_only=True, make_labels=False)[0]
+            sample = self._dataset_preprocessor.process_one(path, audio_only=True, make_labels=False)
             return self.decode_sample(sample)
         elif isinstance(path, list):
-            samples = [self._dataset_preprocessor.process_one([p], audio_only=True, make_labels=False)[0] for p in path]
+            samples = [self._dataset_preprocessor.process_one(p, audio_only=True, make_labels=False) for p in path]
             return [self.decode_sample(s) for s in samples]
         else:
             raise NotImplementedError

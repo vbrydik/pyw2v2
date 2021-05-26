@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-VERSION = '0.0.1a2'
+VERSION = '0.0.1a3'
 DESCRIPTION = 'Simple wav2vec2 wrapper'
 
 with open("./README.md", 'r') as f:
@@ -17,7 +17,15 @@ setup(
     long_description_content_type="text/markdown",
     long_description=long_description,
     packages=find_packages(),
-    install_requires=["torch", "torchaudio", "librosa", "transformers", "datasets", "easydict", "PyYAML"],
+    install_requires=[
+        "torch", 
+        "torchaudio", 
+        "librosa", 
+        "transformers", 
+        "datasets", 
+        "easydict", 
+        "PyYAML"
+    ],
     keywords=['python'],
     classifiers=[
         "Development Status :: 1 - Planning",

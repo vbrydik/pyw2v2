@@ -1,3 +1,4 @@
+import torch
 import numpy as np
 from easydict import EasyDict
 from datasets import Dataset
@@ -6,6 +7,7 @@ from transformers import TrainingArguments, Trainer
 
 from pyw2v2.components.metrics import Metrics
 from pyw2v2.components.external.data_collator_ctc import DataCollatorCTCWithPadding
+from pyw2v2.components.dataset_proc import DatasetPreprocessor
 
 
 class ModelCTC:
@@ -16,7 +18,8 @@ class ModelCTC:
         self._processor = None
         self._data_collator = None
         self._training_args = None
-
+        self._dataset_preprocessor = None
+        
         self._init_processor(config)
         self._init_metrics(config)
         self._init_data_collator()
@@ -30,6 +33,14 @@ class ModelCTC:
     @processor.setter
     def processor(self, var: Wav2Vec2Processor):
         self._processor = var
+
+    @property
+    def dataset_preprocessor(self):
+        return self._dataset_preprocessor
+    
+    @processor.setter
+    def dataset_preprocessor(self, var: DatasetPreprocessor):
+        self._dataset_preprocessor = var
 
     def _init_processor(self, config: EasyDict):
         config.processor.tokenizer.vocab_file = config.common.vocab_file
@@ -82,3 +93,23 @@ class ModelCTC:
             eval_dataset=eval_set,
             tokenizer=self._processor.feature_extractor)
         trainer.train()
+
+    def decode_sample(self, batch):
+        input_dict = self._processor(batch["input_values"], return_tensors="pt", padding=True)
+        logits = self._model(input_dict.input_values.to("cuda")).logits
+        pred_ids = torch.argmax(logits, dim=-1)
+        batch['decoded'] = self._processor.decode(pred_ids)
+        return batch
+
+    def decode(self, dataset: Dataset):
+        return dataset.map(self.decode_sample)
+
+    def decode_raw(self, path: str or list):
+        if isinstance(path, str):
+            sample = self._dataset_preprocessor.process_one(path, audio_only=True, make_labels=False)
+            return self.decode_sample(sample)
+        elif isinstance(path, list):
+            samples = [self._dataset_preprocessor.process_one(p, audio_only=True, make_labels=False) for p in path]
+            return [self.decode_sample(s) for s in samples]
+        else:
+            raise NotImplementedError

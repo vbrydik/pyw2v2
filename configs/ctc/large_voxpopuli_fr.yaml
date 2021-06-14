@@ -1,7 +1,7 @@
 common:
-  model_path: "./models/large_xlsr_53_ft"
+  model_path: "./models/large_fr_vox_ft"
   vocab_file: "./vocab.json"
-  pretrained_model: "facebook/wav2vec2-large-xlsr-53"
+  pretrained_model: "facebook/wav2vec2-large-fr-voxpopuli"
   checkpoint_model: null
   metrics: ["wer", "cer"]
 processor:

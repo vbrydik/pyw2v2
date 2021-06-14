@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-VERSION = '0.0.1a4'
+VERSION = '0.0.2'
 DESCRIPTION = 'Simple wav2vec2 wrapper'
 
 with open("./README.md", 'r') as f:
@@ -24,7 +24,8 @@ setup(
         "transformers", 
         "datasets", 
         "easydict", 
-        "PyYAML"
+        "PyYAML",
+        "jiwer"
     ],
     keywords=['python'],
     classifiers=[

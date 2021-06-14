@@ -28,20 +28,20 @@ class DatasetPreprocessor:
         self._processor = var
 
     def _to_lower(self, batch, text_column=None):
-        text_column = text_column if text_column is not None else self._path_column
+        text_column = text_column if text_column is not None else self._text_column
 
         batch[self._text_column] = batch[text_column].lower() 
         return batch
 
     def _remove_characters(self, batch, text_column=None):
-        text_column = text_column if text_column is not None else self._path_column
+        text_column = text_column if text_column is not None else self._text_column
 
         for char in self._remove_chars:
             batch[text_column] = batch[text_column].replace(char, '')
         return batch
     
     def _replace_characters(self, batch, text_column=None):
-        text_column = text_column if text_column is not None else self._path_column
+        text_column = text_column if text_column is not None else self._text_column
 
         for k, v in self._replace_chars.items():
             batch[text_column] = batch[text_column].replace(k, v)
@@ -64,11 +64,14 @@ class DatasetPreprocessor:
         batch["sampling_rate"] = sampling_rate
         return batch
 
-    def _prepare_batch(self, batch, make_labels=True):
-        assert (
-            len(set(batch["sampling_rate"])) == 1
-        ), f"Make sure all inputs have the same sampling rate of {self._processor.feature_extractor.sampling_rate}."
-        batch["input_values"] = self._processor(batch["speech"], sampling_rate=batch["sampling_rate"][0]).input_values
+    def _prepare_batch(self, batch, make_labels=True, single_file=False):
+        if not single_file:
+            assert (
+                len(set(batch["sampling_rate"])) == 1
+            ), f"Make sure all inputs have the same sampling rate of {self._processor.feature_extractor.sampling_rate}."
+            batch["input_values"] = self._processor(batch["speech"], sampling_rate=batch["sampling_rate"][0]).input_values
+        else:
+            batch["input_values"] = self._processor(batch["speech"], sampling_rate=batch["sampling_rate"]).input_values
         if make_labels:
             with self._processor.as_target_processor():
                 batch["labels"] = self._processor(batch[self._text_column]).input_ids
@@ -104,9 +107,7 @@ class DatasetPreprocessor:
             data = self._to_lower(data, text_column='text')
         data = self._speech_file_to_array(data, path_column='path')
         data = self._resample(data, sampling_rate=sampling_rate)
-        data = self._prepare_batch(data, batch_size=8, batched=True,
-                                   num_proc=self._num_proc,
-                                   make_labels=make_labels)
+        data = self._prepare_batch(data, make_labels=make_labels, single_file=True)
         return data
             
         

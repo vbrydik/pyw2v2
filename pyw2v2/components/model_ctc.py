@@ -97,7 +97,7 @@ class ModelCTC:
     def decode_sample(self, batch):
         input_dict = self._processor(batch["input_values"], return_tensors="pt", padding=True)
         logits = self._model(input_dict.input_values.to("cuda")).logits
-        pred_ids = torch.argmax(logits, dim=-1)
+        pred_ids = torch.argmax(logits, dim=-1)[0]
         batch['decoded'] = self._processor.decode(pred_ids)
         return batch
 
